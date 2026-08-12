@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPSC Study Dashboard — Prelims & Mains Progress Tracker</title>
+    <meta name="description" content="Track your UPSC Prelims and Mains topic completion progress with this interactive dashboard.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2035;
+            --bg-card-hover: #1f2847;
+            --bg-surface: rgba(30, 41, 75, 0.6);
+            --text-primary: #f0f4ff;
+            --text-secondary: #94a3c8;
+            --text-muted: #5b6b8a;
+            --accent-blue: #3b82f6;
+            --accent-blue-glow: rgba(59, 130, 246, 0.3);
+            --accent-purple: #8b5cf6;
+            --accent-purple-glow: rgba(139, 92, 246, 0.3);
+            --accent-green: #10b981;
+            --accent-green-glow: rgba(16, 185, 129, 0.25);
+            --accent-amber: #f59e0b;
+            --accent-amber-glow: rgba(245, 158, 11, 0.25);
+            --accent-rose: #f43f5e;
+            --accent-rose-glow: rgba(244, 63, 94, 0.25);
+            --accent-cyan: #06b6d4;
+            --border-subtle: rgba(148, 163, 200, 0.1);
+            --border-accent: rgba(59, 130, 246, 0.3);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+            --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.1);
+            --transition-fast: 0.15s ease;
+            --transition-med: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px) saturate(1.5);
+            -webkit-backdrop-filter: blur(20px) saturate(1.5);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0 2rem;
+        }
+        .header-inner {
+            max-width: 1440px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between; height: 72px;
+        }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: 800;
+            box-shadow: 0 0 20px var(--accent-blue-glow);
+        }
+        .logo-text {
+            font-size: 1.25rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .header-stats { display: flex; align-items: center; gap: 16px; }
+        .header-stat { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-secondary); }
+        .header-stat-value { font-weight: 700; font-size: 0.92rem; color: var(--text-primary); }
+
+        .header-btn {
+            padding: 7px 12px; border-radius: var(--radius-sm); font-family: inherit;
+            font-size: 0.75rem; font-weight: 600; cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex; align-items: center; gap: 5px; white-space: nowrap;
+        }
+        .file-connect-btn { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: var(--accent-green); }
+        .file-connect-btn:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-green); box-shadow: 0 0 15px var(--accent-green-glow); }
+        .file-connect-btn.connected { background: rgba(16, 185, 129, 0.15); border-color: var(--accent-green); }
+        .file-save-btn { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+        .file-save-btn:hover { background: rgba(59, 130, 246, 0.2); border-color: var(--accent-blue); box-shadow: 0 0 15px var(--accent-blue-glow); }
+        .file-load-btn { background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: var(--accent-purple); }
+        .file-load-btn:hover { background: rgba(139, 92, 246, 0.2); border-color: var(--accent-purple); box-shadow: 0 0 15px var(--accent-purple-glow); }
+        .json-import-btn { background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.25); color: var(--accent-cyan); }
+        .json-import-btn:hover { background: rgba(6, 182, 212, 0.2); border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); }
+        .reset-btn { background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.25); color: var(--accent-rose); }
+        .reset-btn:hover { background: rgba(244, 63, 94, 0.2); border-color: var(--accent-rose); box-shadow: 0 0 15px var(--accent-rose-glow); }
+
+        .file-status { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+        .file-status .dot { width: 7px; height: 7px; border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .file-status.connected .dot { background: var(--accent-green); }
+        .file-status.connected { color: var(--accent-green); background: rgba(16, 185, 129, 0.08); }
+        .file-status.disconnected .dot { background: var(--text-muted); animation: none; }
+        .file-status.disconnected { color: var(--text-muted); background: rgba(148, 163, 200, 0.06); }
+
+        .sync-toast {
+            position: fixed; bottom: 24px; right: 24px; padding: 12px 20px;
+            border-radius: var(--radius-md); font-size: 0.82rem; font-weight: 600;
+            z-index: 200; transform: translateY(80px); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 8px;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+        .sync-toast.show { transform: translateY(0); opacity: 1; }
+        .sync-toast.success { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--accent-green); }
+        .sync-toast.info { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent-blue); }
+        .sync-toast.error { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: var(--accent-rose); }
+
+        .main { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 2rem; }
+
+        .tab-bar {
+            display: flex; gap: 4px; background: var(--bg-secondary); padding: 4px;
+            border-radius: var(--radius-lg); margin-bottom: 2rem;
+            border: 1px solid var(--border-subtle); width: fit-content;
+        }
+        .tab-btn {
+            padding: 12px 28px; border: none; background: transparent; color: var(--text-secondary);
+            font-family: inherit; font-size: 0.9rem; font-weight: 600;
+            border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-med);
+        }
+        .tab-btn:hover { color: var(--text-primary); background: rgba(59, 130, 246, 0.08); }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.15));
+            color: var(--text-primary); box-shadow: 0 2px 12px var(--accent-blue-glow);
+        }
+        .tab-btn .badge {
+            display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 20px;
+            font-size: 0.7rem; font-weight: 700; background: rgba(59, 130, 246, 0.15); color: var(--accent-blue);
+        }
+        .tab-btn.active .badge { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+
+        .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+        .overview-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg); padding: 20px;
+            transition: all var(--transition-med); position: relative; overflow: hidden;
+        }
+        .overview-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+        .overview-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+        .overview-card:nth-child(2)::before { background: linear-gradient(90deg, var(--accent-green), #34d399); }
+        .overview-card:nth-child(3)::before { background: linear-gradient(90deg, var(--accent-amber), #fbbf24); }
+        .overview-card:nth-child(4)::before { background: linear-gradient(90deg, var(--accent-purple), #a78bfa); }
+        .overview-card:hover { border-color: var(--border-accent); transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+        .overview-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
+        .overview-value { font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+        .overview-sub { font-size: 0.8rem; color: var(--text-secondary); }
+
+        .search-bar { position: relative; margin-bottom: 1.5rem; }
+        .search-bar input {
+            width: 100%; padding: 14px 20px 14px 48px; background: var(--bg-card);
+            border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+            color: var(--text-primary); font-family: inherit; font-size: 0.95rem;
+            outline: none; transition: all var(--transition-med);
+        }
+        .search-bar input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-glow); }
+        .search-bar input::placeholder { color: var(--text-muted); }
+        .search-bar .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1rem; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .subject-section { margin-bottom: 16px; }
+        .subject-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; background: var(--bg-card);
+            border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+            cursor: pointer; transition: all var(--transition-med); user-select: none;
+        }
+        .subject-header:hover { background: var(--bg-card-hover); border-color: var(--border-accent); }
+        .subject-header.expanded { border-radius: var(--radius-md) var(--radius-md) 0 0; border-bottom-color: transparent; background: var(--bg-card-hover); }
+        .subject-left { display: flex; align-items: center; gap: 14px; }
+        .chevron { width: 20px; height: 20px; color: var(--text-muted); transition: transform var(--transition-med); flex-shrink: 0; }
+        .subject-header.expanded .chevron { transform: rotate(90deg); }
+        .subject-name { font-weight: 600; font-size: 0.95rem; }
+        .subject-right { display: flex; align-items: center; gap: 12px; }
+        .subject-progress-bar { width: 140px; height: 6px; background: rgba(148, 163, 200, 0.1); border-radius: 3px; overflow: hidden; }
+        .subject-progress-fill { height: 100%; border-radius: 3px; transition: width var(--transition-slow); background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); }
+        .subject-progress-fill.complete { background: linear-gradient(90deg, var(--accent-green), #34d399); }
+        .subject-count { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; min-width: 60px; text-align: right; }
+
+        .subject-body {
+            display: none; background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle); border-top: none;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            padding: 8px 12px; max-height: 500px; overflow-y: auto;
+        }
+        .subject-body.expanded { display: block; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { opacity: 0; } to { opacity: 1; } }
+        .subject-body::-webkit-scrollbar { width: 6px; }
+        .subject-body::-webkit-scrollbar-track { background: transparent; }
+        .subject-body::-webkit-scrollbar-thumb { background: rgba(148, 163, 200, 0.2); border-radius: 3px; }
+
+        .topic-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+            border-radius: var(--radius-sm); transition: background var(--transition-fast); cursor: pointer;
+        }
+        .topic-item:hover { background: rgba(59, 130, 246, 0.06); }
+        .topic-checkbox { position: relative; width: 22px; height: 22px; flex-shrink: 0; }
+        .topic-checkbox input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; }
+        .topic-checkbox .checkmark {
+            position: absolute; top: 0; left: 0; width: 22px; height: 22px;
+            border: 2px solid var(--text-muted); border-radius: 6px;
+            transition: all var(--transition-fast); display: flex; align-items: center; justify-content: center;
+        }
+        .topic-checkbox .checkmark::after {
+            content: ''; width: 5px; height: 10px; border: solid transparent;
+            border-width: 0 2.5px 2.5px 0; transform: rotate(45deg) scale(0);
+            transition: all var(--transition-fast); margin-top: -2px;
+        }
+        .topic-checkbox input:checked + .checkmark {
+            background: linear-gradient(135deg, var(--accent-green), #34d399);
+            border-color: var(--accent-green); box-shadow: 0 0 12px var(--accent-green-glow);
+        }
+        .topic-checkbox input:checked + .checkmark::after { border-color: white; transform: rotate(45deg) scale(1); }
+        .topic-label { font-size: 0.88rem; color: var(--text-secondary); transition: all var(--transition-fast); flex: 1; }
+        .topic-item.completed .topic-label { color: var(--text-muted); text-decoration: line-through; text-decoration-color: rgba(91,107,138,0.4); }
+        .topic-number {
+            font-size: 0.72rem; color: var(--text-muted); font-weight: 600; min-width: 28px;
+            text-align: center; padding: 2px 6px; background: rgba(148,163,200,0.06); border-radius: 4px;
+        }
+
+        /* Delete topic button */
+        .topic-delete {
+            opacity: 0; width: 20px; height: 20px; border: none; background: none;
+            color: var(--accent-rose); cursor: pointer; font-size: 0.85rem;
+            border-radius: 4px; transition: all var(--transition-fast);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .topic-item:hover .topic-delete.custom-topic { opacity: 0.6; }
+        .topic-delete:hover { opacity: 1 !important; background: rgba(244,63,94,0.1); }
+
+        .gs-paper-section { margin-bottom: 24px; }
+        .gs-paper-header {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 12px;
+            padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);
+        }
+        .gs-paper-tag { padding: 6px 16px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; }
+        .gs-paper-tag.gs1 { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(6,182,212,0.15)); color: var(--accent-cyan); }
+        .gs-paper-tag.gs2 { background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(167,139,250,0.15)); color: #a78bfa; }
+        .gs-paper-tag.gs3 { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,191,36,0.15)); color: var(--accent-amber); }
+        .gs-paper-tag.gs4 { background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(52,211,153,0.15)); color: #34d399; }
+        .gs-paper-info { font-size: 0.85rem; color: var(--text-secondary); }
+        .gs-paper-progress { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+        .gs-paper-bar { width: 180px; height: 8px; background: rgba(148,163,200,0.1); border-radius: 4px; overflow: hidden; }
+        .gs-paper-fill { height: 100%; border-radius: 4px; transition: width var(--transition-slow); }
+        .gs-paper-fill.gs1 { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+        .gs-paper-fill.gs2 { background: linear-gradient(90deg, var(--accent-purple), #a78bfa); }
+        .gs-paper-fill.gs3 { background: linear-gradient(90deg, var(--accent-amber), #fbbf24); }
+        .gs-paper-fill.gs4 { background: linear-gradient(90deg, var(--accent-green), #34d399); }
+        .gs-paper-pct { font-weight: 700; font-size: 0.9rem; min-width: 45px; text-align: right; }
+
+        .donut-container { display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .donut-wrapper { position: relative; width: 160px; height: 160px; }
+        .donut-wrapper svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .donut-bg { fill: none; stroke: rgba(148,163,200,0.08); stroke-width: 12; }
+        .donut-fill { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset var(--transition-slow); }
+        .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .donut-pct { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+        .donut-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        .mark-all-btn {
+            background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: var(--accent-blue);
+            padding: 4px 10px; border-radius: 6px; font-family: inherit; font-size: 0.72rem;
+            font-weight: 600; cursor: pointer; transition: all var(--transition-fast); white-space: nowrap;
+        }
+        .mark-all-btn:hover { background: rgba(59,130,246,0.2); border-color: var(--accent-blue); }
+        .mark-all-btn.unmark { background: rgba(244,63,94,0.08); border-color: rgba(244,63,94,0.2); color: var(--accent-rose); }
+        .mark-all-btn.unmark:hover { background: rgba(244,63,94,0.15); border-color: var(--accent-rose); }
+
+        /* ========== ADD TOPIC BUTTON ========== */
+        .add-topic-btn {
+            background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: var(--accent-green);
+            padding: 4px 10px; border-radius: 6px; font-family: inherit; font-size: 0.75rem;
+            font-weight: 700; cursor: pointer; transition: all var(--transition-fast); white-space: nowrap;
+        }
+        .add-topic-btn:hover { background: rgba(16,185,129,0.18); border-color: var(--accent-green); box-shadow: 0 0 10px var(--accent-green-glow); }
+
+        /* Add topic inline form */
+        .add-topic-form {
+            display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+            background: rgba(16,185,129,0.04); border-radius: var(--radius-sm);
+            margin-top: 4px; animation: fadeIn 0.2s ease;
+        }
+        .add-topic-form input {
+            flex: 1; padding: 8px 12px; background: var(--bg-card);
+            border: 1px solid rgba(16,185,129,0.25); border-radius: 6px;
+            color: var(--text-primary); font-family: inherit; font-size: 0.85rem; outline: none;
+            transition: border-color var(--transition-fast);
+        }
+        .add-topic-form input:focus { border-color: var(--accent-green); box-shadow: 0 0 0 2px var(--accent-green-glow); }
+        .add-topic-form input::placeholder { color: var(--text-muted); }
+        .add-topic-form button {
+            padding: 8px 14px; border-radius: 6px; font-family: inherit; font-size: 0.8rem;
+            font-weight: 600; cursor: pointer; transition: all var(--transition-fast); border: none;
+        }
+        .add-topic-form .confirm-btn { background: var(--accent-green); color: white; }
+        .add-topic-form .confirm-btn:hover { background: #0ea572; }
+        .add-topic-form .cancel-btn { background: rgba(148,163,200,0.1); color: var(--text-secondary); }
+        .add-topic-form .cancel-btn:hover { background: rgba(148,163,200,0.2); }
+
+        /* JSON import modal overlay */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 500;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+        .modal {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl); padding: 32px; max-width: 520px; width: 90%;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+        }
+        .modal h2 { font-size: 1.2rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .modal p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .modal-btn {
+            flex: 1; padding: 14px 20px; border-radius: var(--radius-md); font-family: inherit;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all var(--transition-fast);
+            border: 1px solid var(--border-subtle); background: var(--bg-secondary);
+            color: var(--text-primary); text-align: center; min-width: 140px;
+        }
+        .modal-btn:hover { border-color: var(--accent-blue); background: rgba(59,130,246,0.08); }
+        .modal-btn .modal-btn-icon { font-size: 1.5rem; display: block; margin-bottom: 6px; }
+        .modal-btn .modal-btn-label { display: block; font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px; background: none; border: none;
+            color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 4px;
+        }
+        .import-result { margin-top: 16px; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 0.82rem; display: none; }
+        .import-result.show { display: block; animation: fadeIn 0.3s ease; }
+        .import-result.success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: var(--accent-green); }
+
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+
+        .motivation-banner {
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.06));
+            border: 1px solid rgba(59,130,246,0.15); border-radius: var(--radius-lg);
+            padding: 16px 24px; margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: var(--text-secondary);
+        }
+        .motivation-banner .emoji { font-size: 1.4rem; }
+        .motivation-banner strong { color: var(--text-primary); }
+
+        @media (max-width: 900px) {
+            .header-inner { height: auto; flex-wrap: wrap; gap: 8px; padding: 12px 0; }
+            .header-controls { flex-wrap: wrap; justify-content: center; gap: 6px; }
+            .main { padding: 1rem; }
+            .tab-bar { width: 100%; }
+            .tab-btn { flex: 1; text-align: center; padding: 10px 12px; font-size: 0.8rem; }
+            .overview-grid { grid-template-columns: repeat(2, 1fr); }
+            .subject-progress-bar { width: 80px; }
+            .gs-paper-bar { width: 100px; }
+            .gs-paper-header { flex-wrap: wrap; }
+            .gs-paper-progress { margin-left: 0; width: 100%; }
+            .donut-wrapper { width: 130px; height: 130px; }
+        }
+
+        .confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        .confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: confetti-fall 2.5s ease-in forwards; }
+        @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+        #file-input-hidden, #json-input-hidden { display: none; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon">U</div>
+                <span class="logo-text">UPSC Study Tracker</span>
+            </div>
+            <div class="header-controls">
+                <div class="header-stats">
+                    <div class="header-stat">Total: <span class="header-stat-value" id="stat-total">0</span></div>
+                    <div class="header-stat">Done: <span class="header-stat-value" id="stat-completed" style="color:var(--accent-green)">0</span></div>
+                    <div class="header-stat">Left: <span class="header-stat-value" id="stat-remaining" style="color:var(--accent-amber)">0</span></div>
+                </div>
+                <div class="file-status disconnected" id="file-status"><span class="dot"></span><span id="file-status-text">No file linked</span></div>
+                <button class="header-btn file-connect-btn" id="file-connect-btn" title="Link a markdown file for auto-saving progress">📁 Link File</button>
+                <button class="header-btn json-import-btn" id="json-import-btn" title="Import topics from GS_Hierarchy.json">📥 Import JSON</button>
+                <button class="header-btn file-save-btn" id="file-save-btn" title="Download progress as markdown">💾 Save .md</button>
+                <button class="header-btn file-load-btn" id="file-load-btn" title="Load progress from markdown file">📂 Load .md</button>
+                <button class="header-btn reset-btn" id="reset-btn" title="Reset all progress">⟲ Reset</button>
+            </div>
+        </div>
+    </header>
+
+    <input type="file" id="file-input-hidden" accept=".md,.markdown,.txt">
+    <input type="file" id="json-input-hidden" accept=".json">
+    <div class="sync-toast" id="sync-toast"></div>
+
+    <!-- JSON Import Modal -->
+    <div class="modal-overlay" id="json-modal">
+        <div class="modal" style="position:relative;">
+            <button class="modal-close" id="json-modal-close">✕</button>
+            <h2>📥 Import Topics from JSON</h2>
+            <p>Select a <strong>GS_Hierarchy.json</strong> file from your Prelims or Mains notes folder. New topics will be <strong>added</strong> to the dashboard — your existing progress won't be lost.</p>
+            <div class="modal-actions">
+                <button class="modal-btn" id="import-prelims-btn">
+                    <span class="modal-btn-icon">📝</span>
+                    Import Prelims JSON
+                    <span class="modal-btn-label">From UPSC-Prelim-Notes folder</span>
+                </button>
+                <button class="modal-btn" id="import-mains-btn">
+                    <span class="modal-btn-icon">📚</span>
+                    Import Mains JSON
+                    <span class="modal-btn-label">From UPSC_MAINS folder</span>
+                </button>
+            </div>
+            <div class="import-result" id="import-result"></div>
+        </div>
+    </div>
+
+    <main class="main">
+        <div class="motivation-banner" id="motivation-banner">
+            <span class="emoji">🎯</span>
+            <span id="motivation-text">Loading your study progress...</span>
+        </div>
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="overview">📊 Overview</button>
+            <button class="tab-btn" data-tab="prelims">📝 Prelims <span class="badge" id="prelims-badge">0%</span></button>
+            <button class="tab-btn" data-tab="mains">📚 Mains <span class="badge" id="mains-badge">0%</span></button>
+        </div>
+        <div class="tab-content active" id="content-overview">
+            <div class="overview-grid" id="overview-grid"></div>
+            <div class="donut-container" id="donut-container"></div>
+        </div>
+        <div class="tab-content" id="content-prelims">
+            <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="prelims-search" placeholder="Search prelims topics..." autocomplete="off"></div>
+            <div id="prelims-subjects"></div>
+        </div>
+        <div class="tab-content" id="content-mains">
+            <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="mains-search" placeholder="Search mains topics..." autocomplete="off"></div>
+            <div id="mains-subjects"></div>
+        </div>
+    </main>
+
+    <script>
+    const STORAGE_KEY = 'upsc-dashboard-progress-v2';
+    const CUSTOM_TOPICS_KEY = 'upsc-dashboard-custom-topics-v1';
+    const FILE_HANDLE_DB = 'upsc-dashboard-filehandle-db';
+
+    // ══════════════════════════════════════════════
+    //  BASE DATA (defaults — custom topics merge on top)
+    // ══════════════════════════════════════════════
+    const BASE_PRELIMS = [
+        { name: "Art and Culture", icon: "🎨", topics: ["Indian Architecture","Temple Architecture","Indian Sculpture","Indian Paintings","Dance Forms in India","Music in India","Indian Religion and Philosophy","Indian Literature and Language","Theatre Forms and Puppetry in India","Indian Handicrafts","Science and Technology Through Ages","India's Cultural Institutions and Associated Awards","UNESCO's Tangible & Intangible World Heritage Sites in India","Miscellaneous","Appendix"] },
+        { name: "Ancient India", icon: "🏛️", topics: ["Early History","Indus Valley Civilization","Vedic Age","Buddhism and Jainism","Magadha Empire","Mauryan Empire","Central Asian Contact","The Satavahanas","The Gupta Empire","Harshavardhana","Kingdoms of South","Sangam Age","Appendix"] },
+        { name: "Medieval India", icon: "⚔️", topics: ["Early Medieval Period","Delhi Sultanate","Bahamani and Vijayanagara Empire","Mughal Empire","The Marathas","Bhakti and Sufi Traditions","Through the Eyes of Travellers","Appendix"] },
+        { name: "Modern India", icon: "🇮🇳", topics: ["Advent of Europeans and Consolidation of British Power","The Revolt of 1857","Rise of Nationalism in India 1858–1905","Indian National Movement 1905–18","Indian National Movement 1918–22 – Gandhian Phase","Indian National Movement 1922–1929","Indian National Movement 1929–1942","Indian National Movement 1942–1947","Constitutional, Administrative and Judicial Developments","Socio-Religious Reform Movements, Organisations and Personalities","People's Resistance Against the British","British Policies and their Economic Impacts","Evolution of Education and Press","Indian Personalities","Foreign Personalities, Governor General and Viceroy","Miscellaneous"] },
+        { name: "Polity", icon: "⚖️", topics: ["Historical Background","Making of the Indian Constitution","Salient Features of the Indian Constitution","System of Government","Preamble of the Constitution","States and Union Territories (Part I, Art. 1–4)","Citizenship (Part II, Art. 5–11)","Fundamental Rights (Part III, Art. 12–35)","Directive Principles of State Policy (Part IV)","Fundamental Duties (Part IVA)","Federal Dynamics in India","Emergency Provisions (Part XVIII)","President, Vice President and Governor","The Executive in India","Parliament (Part V, Art. 79–122)","State Legislatures (Part VI)","The Indian Judicial System","Panchayats, Municipalities and Cooperative Societies","Special Provisions in Constitution","Constitutional Bodies","Extra-Constitutional Bodies","Elections in India","Miscellaneous"] },
+        { name: "Economy", icon: "💰", topics: ["Basic Microeconomics","National Income Accounting","Money and Banking","Monetary Policy and Inflation","Government Budgeting and Fiscal Policy","Balance of Payments, Foreign Exchange and IFIs","Financial Market","Historical Background of Indian Economy & Agriculture","Industry, Manufacturing and Infrastructure","LPG Reforms and Service Sector","Human Capital, Unemployment, Skilling and Poverty","Miscellaneous"] },
+        { name: "Physical Geography", icon: "🌍", topics: ["Origin and Evolution of Earth","Interior of Earth, Plate Tectonics and Related Phenomenon","Geomorphic Processes and Landforms","Atmosphere and Heat Balance","Atmospheric Circulation and Weather Systems","World Climate","Ocean and Its Movement"] },
+        { name: "Indian Geography & Human/Economic Geography", icon: "🗺️", topics: ["India – Location, Structure and Physiography","Drainage System","Climate","Natural Hazards and Disasters","Soils and Natural Vegetation","Resource and Manufacturing Industries","Trade, Transport and Communication","Population and Settlements"] },
+        { name: "Environment", icon: "🌿", topics: ["Basics of Environment and Ecosystem","Biodiversity","Wildlife Conservation","Pollution – Causes, Impacts and Control","Land Degradation","Climate Change and International Environmental Conventions","National Environmental Legislation","Energy","Major Species and Invasive Species","Protected Area Network of India"] },
+        { name: "Science and Technology", icon: "🔬", topics: ["General Physics and Everyday Chemistry","Basic Biology","Biotechnology","Health and Diseases","Information and Communication Technology","Universe and Space Technology","Defence Technology","Energy","Miscellaneous – Contribution of Indian Scientists and Nobel Prizes"] },
+        { name: "Government Schemes", icon: "🏗️", topics: ["Central Schemes"] },
+        { name: "International Relations", icon: "🌐", topics: ["Africa","Asia","Europe","Miscellaneous","North America","Oceania","South America"] },
+        { name: "Sports", icon: "🏏", topics: ["Sports"] },
+        { name: "Reports", icon: "📄", topics: ["Reports"] },
+        { name: "Mapping", icon: "📍", topics: ["Mapping","Conflict Regions of the World"] },
+        { name: "Miscellaneous", icon: "📦", topics: ["Miscellaneous"] }
+    ];
+
+    const BASE_MAINS = {
+        "GS 1": [
+            { name: "Ancient & Medieval Culture (AMAC)", topics: ["Prehistoric Period in India","Chalcolithic Age","Iron Age in India","Megalithic Culture in India","Indus Valley Civilization","Vedic Period","Mahajanapadas","Rise of Magadh","Maurya Dynasty","Shunga Dynasty","Kanva Dynasty","Chedi Dynasty","Satavahana Dynasty","Indo-Greek, Sakas and Parthians","The Kushanas","Sangam Age","Gupta Dynasty","Pushyabhuti Dynasty","Chalukyas of Badami","Pallavas of Kanchi","Foreign Travellers","Pala Dynasty","Rashtrakuta Dynasty","Gurjara-Pratihara Dynasty","Chola Dynasty","Kakatiya Dynasty","Yadavas Dynasty","Hoysala Dynasty","Vijayanagar Empire","Bahmani Kingdom","Deccan Sultanate","Foreign Invasions","Delhi Sultanate","Mughal Empire","Sher Shah Suri","Bhakti and Sufi Movements","Buddhism","Jainism","Indian Philosophy"] },
+            { name: "Geography", topics: ["Structure of Earth Atmosphere","Temperature Distribution on Earth","Air Mass","Pressure Belts","Atmospheric Circulations","Atmospheric Rivers","Internal Structure of Earth","Exogenic and Endogenic Forces","Plate Tectonics","Rocks","Landforms","Ocean Relief","Ocean Characteristics","Water Masses","Ocean Currents","Deep Ocean Water Circulation","Atlantification","Ocean-Atmospheric Interactions","Sea Level Changes","Global Ocean Heat Content","Earthquakes","Tsunami","Volcanic Activity","Landslides","Cyclones","Cloudbursts","Physiography of India","Drainage System of India","Natural Vegetation in India","Soils in India","Indian Monsoon","Natural Resources","Nuclear Resources","Energy Resources","Resource Geography of India","Resource Potential of Regions of the World","Primary Industry","Secondary Industry","Tertiary Industry","Industrial Corridors","Population in Ganga Basin","Population in Himalayan Region","Cryosphere","Dead Zone","Water Resources","Consequences of Climate Change"] },
+            { name: "Indian Society", topics: ["Diversity and Its Challenges","Indian Values and Caste System","Value System of Indian Society","Caste System in India","Class, Family and Marriage","Indian Middle/Elite/Poor Class","Family System in India","Marriage","Globalization","Regionalism","Population and Associated Issues","Secularism","Communalism","Urbanization","Poverty","Women's Movement in India","Role of Women and Women's Organisations","National Policy for Women 2001","Role of Women in Polity","Women in Panchayati Raj Institutions","Reproductive Rights of Women","Surrogacy","Menstrual Leave","Women and Education","Role of Women in Science and Technology","Gender Pay Gap","Unpaid Care Work","Women in Indian Agriculture","Women-in-Command in Indian Army","Violence Against Women","Marital Rape","Increasing Age of Marriage","Social Exclusion","Social Inequality","Social Empowerment","Discrimination in India","Who is Vulnerable","Tribes in India","Persons with Disabilities","LGBTQ Issues","Migrants Issue","Children"] },
+            { name: "Modern History", topics: ["Advent of Europeans in India","Battle of Plassey (1757)","Battle of Buxar (1764)","Carnatic Wars","Anglo Mysore Wars","Anglo Maratha Wars","Impact of British Rule in India","Acts and Regulations under East India Company","Economic Policies of British in India","British Education System in India","Land Revenue System in British India","Governor Generals and Viceroys","Civil Uprisings Before 1857","Tribal Revolts and Movements","Revolt of 1857","Peasant Movements","Socio-Religious Reform Movements","Formation of INC","Swadeshi Movement","Extremist Phase of INC","Revolutionary Movement in India","Revolutionary Activities Abroad","Mahatma Gandhi","Home Rule Movement","Non Cooperation Movement (1920–22)","Civil Disobedience Movement (1930–34)","Quit India Movement","INA and Subhas Chandra Bose","Naval Mutiny and Post-War Movements","Constituent Assembly and Independence Act 1947","Role of Women in the Freedom Movement","Role of Press in Freedom Movement","Role of Workers and Labour Movements","Nationalists and Freedom Fighters","Nationalist Literature, Songs, Theatre, and Art"] },
+            { name: "World History", topics: ["American Revolution","American Civil War","Renaissance","French Revolution","Unification of Italy and Germany","Industrial Revolution in England","Late Industrialization","Great Depression","Capitalism, Socialism and Communism","Rise of Fascism and Nazism","Russian Revolution","World Wars and Redrawing of Boundaries","Colonialism in Africa and Asia","Indentured Labour and Diaspora","Decolonization in Asia and Africa","Arab Nationalism and West Asia Suez Crisis","Global Institutions","Cold War Era"] }
+        ],
+        "GS 2": [
+            { name: "Governance", topics: ["Development Processes and Role of NGOs, SHGs","Development","Human Resource Development","Skill Development","Civil Society","Non-Governmental Organizations (NGO)","Dependence on Donor Agencies","Pressure Group","Self-Help Groups (SHG)","Cooperatives in India","Role of Non-State Actors in Governance","Relation between Government and Governance","Dimensions of Governance in India","Good Governance","Role of State, Market, and Civil Society","Local Governance in India","Panchayats and Municipalities","e-Governance","India's e-Governance","Features of e-Governance","Components of E-Governance","Way Forward for Effective E-Governance","Social Media and Governance","Emerging Technologies and Governance","Blockchain Technology and Governance","Governance and AI","Deepfake Regulation in India","OTT Platforms","Social and Economic Governance","Social Governance in India","Economic Governance in India","Balancing Equity and Efficiency","Affirmative Action in India","Governance of Sports in India","Consumer Protection","Surrogate Advertisements","Environmental and Ethical Governance","Environmental Governance","Policy Contradictions and Environmental Degradation","SDGs and India","Ethical Governance in India","Ethical Issues in Indian Governance","Citizen Charter","Key Components of Citizen's Charter","Salient Features of Citizen Charter","Challenges in Citizen Charter","Measures to Make Citizen Charter Effective","Sevottam Model","Right to Information","Social Audit","Social Accountability","Whistleblowers Protection Act","Lokpal and Lokayukta Act 2013","Central Bureau of Investigation (CBI)","Enforcement Directorate","Role of Civil Services in Democracy","Constitutional Provisions – Civil Services","Civil Services Reforms","Major Committees on Civil Services Reforms","Lateral Entry Issue","Mission Karmyogi","Civil Services Board","Central Information Commission"] },
+            { name: "International Relations", topics: ["India and its Neighbourhood Relations","India-Pakistan","India-Bangladesh","India-Nepal","India-Afghanistan","India-Myanmar","India-Bhutan","India-Sri Lanka","India-Maldives","India-USA","India-Russia","India-China","India-EU","India-Japan","India-South-East Asia","India-West Asia","India-Iran","India-Israel","India-Central Asia","India-Latin America","India-Australia","India-Africa","India-South Korea","India-France","India-Germany","India-Canada","India-Brazil","India-UAE","India-Oman","SAARC","BRICS","BIMSTEC","SCO","QUAD","NATO","G-20","G-7","World Bank","WTO","IMF","WHO","United Nations Organisation","UNESCO","International Criminal Court (ICC)","Indian Diaspora","India & Geopolitics of Technology","India's Soft Power","Energy Diplomacy","Defence Diplomacy","India and the Global South"] },
+            { name: "Polity", topics: ["Indian Constitution","Historical Underpinnings","Amendments","Basic Structure Doctrine","5th Schedule","6th Schedule","9th Schedule","Anti-defection Law – 10th Schedule","The Preamble","Citizenship","Fundamental Rights","Right to Equality","Reservation in India","Right to Freedom","Article 21","Right to Freedom of Religion","Writs in Indian Constitution","Directive Principles of State Policy","Uniform Civil Code","Fundamental Duties","Separation of Powers","Constitutionalism","Federalism in India","Indian Parliament","Functioning of Indian Parliament","Functionaries of Parliament","Money Bill","Parliamentary Committees","Budget","Executive Accountability and Parliamentary Scrutiny","Parliamentary Privileges","State Legislatures","Emergency Provisions","Comparison India-France Constitution","Comparison India-UK Constitution","Comparison India-USA Constitution","Panchayati Raj Institutions","PESA Act 1996","Urban Local Bodies","Constitutional Bodies in India","Election Commission of India","UPSC (Commission)","Finance Commission of India","GST Council","National Commission for Scheduled Castes","National Commission for Scheduled Tribes","National Commission for Backward Classes","Special Officer for Linguistic Minorities","CAG","Attorney General of India","Advocate General of the State","Statutory Bodies in India","NHRC","CVC","National Commission for Women","National Green Tribunal","SEBI","Armed Forces Tribunal","Competition Commission of India","National Consumer Disputes Redressal Commission","National Commission for Minorities","National Commission for Protection of Child Rights","National Legal Services Authority","Delimitation Commission","Quasi Judicial Bodies","Central Information Commission","Tribunals","Indian Judiciary","Supreme Court","High Court","Subordinate/Lower Courts","Judicial Pendency","Judicial Appointments and Vacancy","Judicial Activism, Overreach and Restraint","Judicial Corruption","Judicial Independence","Judicial Infrastructure","Lok Adalat","Alternate Dispute Resolution (ADR)","Gram Nyayalaya","Contempt of Court","The President","The Vice-President","PM, Council of Ministers and Cabinet","Governor","Representation of the People Act","Political Parties","Pressure Groups","Lokpal and Lokayukta"] },
+            { name: "Social Justice", topics: ["Women in India","Legislations for Women in India","Children","Elderly and Senior Citizens","Persons with Disability","Transgenders","Scheduled Caste","Scheduled Tribes","Health","Education","School Education in India","Higher Education in India","NEP 2020 and Three Language Formula","Online Education (E-Learning)","Skill Development","Hunger","Affirmative Action in India"] }
+        ],
+        "GS 3": [
+            { name: "Agriculture", topics: ["Agriculture Thinking Pattern","Significance of Agricultural Sector","Land Reforms","Water","Micro Irrigation","Fertilisers","Seeds","Pesticides","GM Crops","Agricultural Mechanisation","Agriculture Extension Services","Agricultural Credit","Insurance","E-Tech in Aid of Farmers","Production","Cooperatives","PACS","APMC","Supply Chain Management","Food Processing Industries","Integrated Farming System","Agriculture Exports","Taxing Agricultural Income","Green Revolution","Climate Smart Agriculture","Organic Farming","Minimum Support Price","Agrarian Distress","Loan Waivers","Food Security and PDS","National Food Security Act","Livestock","Fisheries","Horticulture","Crop Diversification","Millets","Agriculture and Food Management","National Mission On Edible Oils","Spices","Volatility in Agricultural Productivity","Use of Drones in Agriculture","Agricultural Market Infrastructure","Agricultural Productivity","Seven Missions","Direct and Indirect Farm Subsidies","WTO Issues","Inverse Fork To Farm","Precision Farming"] },
+            { name: "Disaster Management", topics: ["Disasters in India and Vulnerability","Disaster Management in India","Earthquakes in India","Tsunami – Preparedness and Mitigation","Floods in India","Heat Waves and Cold Waves","Landslides","Cyclone – Preparedness and Management","Forest Fires","Drought","Urban Floods","Cloudbursts","Coastal Floods","Man-Made Disasters"] },
+            { name: "Economics", topics: ["Economic Development","The Indian Growth Story","Current Challenges of Indian Economy","Global Slowdown and Indian Economy","V-Shaped Economic Recovery","Digitalization in Indian Economy","Economic Growth vs Economic Development","Dimensions of Growth and Development","Measurement and Indicators of Growth","India's New GDP Series","India's Potential Growth GDP","Alternatives to GDP Calculation","Inclusive Growth","Equity Across Generations","India's Regional Income Disparities","Environment and Development Linkage","Minimum Wage vs Living Wage","HDI vs IHDI","What is Economic Planning","NITI Aayog","Vision, Strategy and Action","Introduction to Budgeting","Need of Government Budgeting","Components of the Budget","Type of Budgeting","Government Deficits","General Analysis of Budgetary Deficits","FRBM Act 2003","Government Borrowings","Fiscal Health Index","16th Finance Commission","Introduction to Taxation","Classification of Taxes","Indirect Taxation","Taxation on Virtual Assets","Global Minimum Corporate Tax","New Industrial Policy 1991","Years of LPG Reforms – Persistent Challenges","Impact of Liberalization on Indian Companies","India's Leap from Agriculture to Services","Government Policies Supporting Manufacturing","Unlocking MSME Potential","Textile Sector","Semiconductor Industry","PLI Scheme","Startup Ecosystem in India","Making India a Manufacturing Hub","Ease of Doing R&D in India","FDI in Defence Sector","Special Economic Zones","Tourism Sector","Communication Sector","Energy Sector","Renewable Energy","Roads","Railways","Ports and Waterways","Logistic Sector","Aviation","Public Investment Model","Private Investment Model","PPP Model","Infrastructure Investment","NIIF","IIPDF","National Infrastructure Pipeline","National Monetisation Pipeline","Causes of Unemployment","Unemployment in India","PLFS","Skill Development","Jobless Growth in India","Demographic Dividend vs Employability Deficit","Jobs and Careers in AI Era","Care Economy","Gig Workers","Orange Economy","Labour Law Reforms"] },
+            { name: "Environment", topics: ["Air Pollution","National Clean Air Program","Stubble Burning","Water Pollution","Water Amendment Act 2024","Water Trading","Namami Gange Program","Arth Ganga","Radioactive Waste","Oil Spill Pollution","Plastic Waste Management","Global Plastic Treaty","Solid Waste Management","Sand Mining","Battery Waste Management","Causes of Climate Change","Impacts of Climate Change","Sea Level Rise + Impact on SIDS","Global Climate Negotiations","Adaptation","Climate Change in India","Mission LiFE and Circular Economy","Energy Transition","Nuclear Energy As Alternative","Data Centres and Rising Electricity Demand","COP 28","COP 29","COP 30","Carbon Credits","Carbon Markets","Green Credit Program"] },
+            { name: "Internal Security", topics: ["Elements of National Security","National Security Doctrine","Nuclear Security Doctrine","Left Wing Extremism","North East Insurgency","Security Issues in Manipur","Security Issues in J&K","Border Management","Pahalgam Attack and Op. Sindoor","Kargil War","Role of Community in Border Management","Illegal Migration","Maritime Security","Money Laundering","PMLA","FATF","FCRA","Terror Financing","No Money For Terror Conference","Terrorism","Use of Technology in Terrorism","Dark Web and Terrorism","Terror and Tourism","Organised Crime","Linkages between Terrorism and Organised Crime","Interpol","Communication Networks","Cyber Security","Cyber Warfare","Joint Doctrine for Cyberspace Operation","Digital Personal Data Protection Act","Greyzone Warfare","Hybrid Warfare","NIA","AFSPA","Defence Reforms and CDS","Agnipath Scheme","Inter-Service Organisation Bill 2023","Defence Procurement","Social Media and Internal Security","Central Armed Police Forces","AI in National Security","UAVs","Telecommunication Rules 2024","National Security Council","Smuggling","Indian Coast Guard","Role of External and Non-State Actors in Internal Security"] },
+            { name: "Science and Technology", topics: ["Bhartiya Antriksh Station","SPADEX","Gaganyaan","Axiom 4","Reusable Launch Vehicle","POEM","Significance of Space Missions","Aditya L-1","Chandrayaan 4","Space Doctrine","Artemis Accords","Space Governance","Satellite Based Internet","Genome India Project","Sickle Cell Disease","Tuberculosis","Trachoma","Bio E3 Policy","AMR","CAR-T Cell Therapy","Achievements of Indians in S&T","Applications of Biotechnology","Nanotechnology","Quantum Dots","Blockchain","Anusandhan NRF Act 2023","IPR","Neuralink","Brain Computer Interface","Directed Energy Weapons","Ballistic Missile Defence System","Nuclear Technology","Nuclear Energy Mission","Artificial Intelligence","BharatGen Program","India AI Mission","Green Hydrogen"] }
+        ],
+        "GS 4": [
+            { name: "Ethics, Integrity & Aptitude", topics: ["What is Ethics","Essence of Ethics","Absolute vs Relative Ethics","Ethics vs Law","Ethics vs Morality","Determinants of Ethics","Role of Ethics","Consequences of Loss of Ethics","Dimensions of Ethics","Western Religious Teaching","Ethics in India – Constitution, Mahabharata","Ethics in India – Ramayana, Rig Veda, Bhakti","Sufi & Islamic Ethics","Sikh & Jain Ethics","Buddhist Ethics","Virtue Ethics","Deontology","Teleology","Social, Individualistic & Environmental Ethics","Economic Ethics","Cultural Ethical Relativism","Split Knower-Doer & Doctrine of Karma","Doctrine of Double Effect","Other Theories","Applied Ethics","Ethics in Public & Private Life","Role of Public Servants","Values vs Belief, Values vs Attitude","Role of Values, Lack of Values","Classification of Values","Value Education","Developing Values","Role of Schools & Teachers","Role of Society & Parents","Values in Administration","Buddha's Dharma","Mahavir & Kautilya","Guru Nanak & Kabir","Tulsidas & Tagore","Ram Mohan Roy & Dayananda Saraswati","Vivekananda & Aurobindo","Mahatma Gandhi","Radhakrishnan","Ambedkar, Azad, Deen Dayal Upadhyay, Lohia","Dalai Lama, Mother Teresa, Amartya Sen, Kalam","Basics of Attitude","Positive Attitude","Attitude Content, Structure, Function","Attitude Structure","Attitude Ambivalence","Attitude Functions","Attitude–Behaviour Situation","Attitude Formation","Attitude Change","ELM Model","Behaviour Leading to Attitude","Political Attitude","Moral, Democratic, Bureaucratic Attitude","Social Influence","Persuasion","Prejudice & Discrimination","Basics of Aptitude, Intelligence, Integrity","Honesty","Objectivity, Impartiality, Non-Partisanship","Professional Ethics, Dedication to Public Service","Compassion, Tolerance, Perseverance","Loyalty, Collegiality","Interdependence, Confidentiality, Innovation","Cardinal Virtues","Lesser Known Values","Constitutional Values","Classical Intelligence vs Emotional Intelligence","Goleman Model","Characteristics of EI","Social Intelligence","Socrates","Plato","Aristotle","Martin Luther King Jr.","Confucius","John Locke","Hobbes","Adam Smith","Durkheim","Rousseau","Immanuel Kant","John Mill","Hegel","Karl Marx","John Rawls","Machiavelli","Epicurus","Kierkegaard","Abraham Lincoln","Carol Gilligan","Nelson Mandela","Public Service Values","Conflict of Interest","Dilemmas","Ethical Guidance, Conscience, Laws, Rules","Accountability","Accountability & Ethical Governance","Strengthening Values in Governance","Corporate Governance","Probity in Governance","Philosophical Basis of Governance","RTI – Right to Information","Conduct Rules 1964","Work Culture","Citizens Charter","Service Delivery","Service Delivery Principles","Utilization of Public Funds"] }
+        ]
+    };
+
+    // ══════════════════════════════════════════════
+    //  RUNTIME STATE
+    // ══════════════════════════════════════════════
+    let progress = {};
+    let customTopics = { prelims: {}, mains: {} };
+    // customTopics.prelims = { "Art and Culture": ["New Topic A"], ... }
+    // customTopics.mains = { "GS 1": { "Geography": ["New Topic B"] }, ... }
+
+    let fileHandle = null;
+    let saveDebounceTimer = null;
+    let jsonImportType = null; // 'prelims' or 'mains'
+
+    // Merged data = base + custom
+    function getMergedPrelims() {
+        return BASE_PRELIMS.map(subj => {
+            const extra = customTopics.prelims[subj.name] || [];
+            return { ...subj, topics: [...subj.topics, ...extra] };
+        });
+    }
+
+    function getMergedMains() {
+        const merged = {};
+        Object.keys(BASE_MAINS).forEach(gs => {
+            merged[gs] = BASE_MAINS[gs].map(subj => {
+                const extra = (customTopics.mains[gs] && customTopics.mains[gs][subj.name]) || [];
+                return { ...subj, topics: [...subj.topics, ...extra] };
+            });
+            // Also add entirely new subjects from custom topics
+            if (customTopics.mains[gs]) {
+                const baseNames = BASE_MAINS[gs].map(s => s.name);
+                Object.keys(customTopics.mains[gs]).forEach(sn => {
+                    if (!baseNames.includes(sn) && customTopics.mains[gs][sn].length > 0) {
+                        merged[gs].push({ name: sn, icon: "📖", topics: customTopics.mains[gs][sn] });
+                    }
+                });
+            }
+        });
+        return merged;
+    }
+
+    // ══════════════════════════════════════════════
+    //  ADD CUSTOM TOPIC
+    // ══════════════════════════════════════════════
+    function addCustomTopic(section, gs, subjectName, topicName) {
+        if (!topicName.trim()) return;
+        const name = topicName.trim();
+        if (section === 'prelims') {
+            if (!customTopics.prelims[subjectName]) customTopics.prelims[subjectName] = [];
+            // Check duplicate
+            const merged = getMergedPrelims().find(s => s.name === subjectName);
+            if (merged && merged.topics.includes(name)) { showToast('Topic already exists!', 'error'); return; }
+            customTopics.prelims[subjectName].push(name);
+        } else {
+            if (!customTopics.mains[gs]) customTopics.mains[gs] = {};
+            if (!customTopics.mains[gs][subjectName]) customTopics.mains[gs][subjectName] = [];
+            const mergedM = getMergedMains();
+            const subj = mergedM[gs]?.find(s => s.name === subjectName);
+            if (subj && subj.topics.includes(name)) { showToast('Topic already exists!', 'error'); return; }
+            customTopics.mains[gs][subjectName].push(name);
+        }
+        saveCustomTopics();
+        saveProgress();
+        updateAllUI();
+        showToast(`✓ Added "${name}"`, 'success');
+    }
+
+    function removeCustomTopic(section, gs, subjectName, topicName) {
+        if (section === 'prelims') {
+            const arr = customTopics.prelims[subjectName];
+            if (arr) { const idx = arr.indexOf(topicName); if (idx > -1) arr.splice(idx, 1); }
+        } else {
+            const arr = customTopics.mains[gs]?.[subjectName];
+            if (arr) { const idx = arr.indexOf(topicName); if (idx > -1) arr.splice(idx, 1); }
+        }
+        saveCustomTopics();
+        saveProgress();
+        updateAllUI();
+        showToast(`Removed "${topicName}"`, 'info');
+    }
+
+    function isCustomTopic(section, gs, subjectName, topicIdx) {
+        let baseTopics;
+        if (section === 'prelims') {
+            baseTopics = BASE_PRELIMS.find(s => s.name === subjectName)?.topics || [];
+        } else {
+            baseTopics = BASE_MAINS[gs]?.find(s => s.name === subjectName)?.topics || [];
+        }
+        return topicIdx >= baseTopics.length;
+    }
+
+    function getCustomTopicName(section, gs, subjectName, topicIdx) {
+        let baseLen;
+        if (section === 'prelims') {
+            baseLen = BASE_PRELIMS.find(s => s.name === subjectName)?.topics.length || 0;
+            return customTopics.prelims[subjectName]?.[topicIdx - baseLen];
+        } else {
+            baseLen = BASE_MAINS[gs]?.find(s => s.name === subjectName)?.topics.length || 0;
+            return customTopics.mains[gs]?.[subjectName]?.[topicIdx - baseLen];
+        }
+    }
+
+    // ══════════════════════════════════════════════
+    //  JSON IMPORT (GS_Hierarchy.json)
+    // ══════════════════════════════════════════════
+    function cleanFileName(name) {
+        return name
+            .replace(/\.md$/i, '')
+            .replace(/^\d+[-_.\s]*/g, '')
+            .replace(/_/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function parsePrelimsJSON(json) {
+        let added = 0;
+        // Navigate: root > UPSC_Prelims > UPSC_Prelims > [subject folders]
+        let subjects = null;
+        function findSubjects(node) {
+            if (!node.children) return;
+            for (const child of node.children) {
+                if (child.type === 'folder' && child.children) {
+                    // Check if children look like subject folders (contain .md files or numbered folders)
+                    const hasSubjectFolders = child.children.some(c => c.type === 'folder' && /^\d+/.test(c.name));
+                    if (hasSubjectFolders) { subjects = child.children.filter(c => c.type === 'folder'); return; }
+                    findSubjects(child);
+                }
+            }
+        }
+        findSubjects(json);
+        if (!subjects) return { added: 0, message: 'Could not find subject folders in JSON.' };
+
+        subjects.forEach(folder => {
+            const folderName = cleanFileName(folder.name);
+            // Try to match to existing prelims subject
+            const match = BASE_PRELIMS.find(s =>
+                s.name.toLowerCase().includes(folderName.toLowerCase().substring(0, 8)) ||
+                folderName.toLowerCase().includes(s.name.toLowerCase().substring(0, 8))
+            );
+            const subjName = match ? match.name : folderName;
+
+            if (!match) {
+                // New subject — add all topics
+                if (!customTopics.prelims[subjName]) customTopics.prelims[subjName] = [];
+                // Also add to BASE_PRELIMS so it appears
+                BASE_PRELIMS.push({ name: subjName, icon: "📖", topics: [] });
+            }
+
+            if (folder.children) {
+                const existingTopics = getMergedPrelims().find(s => s.name === subjName)?.topics || [];
+                const existingLower = existingTopics.map(t => t.toLowerCase());
+
+                folder.children.forEach(file => {
+                    if (file.type !== 'file' || !file.name.endsWith('.md')) return;
+                    const topicName = cleanFileName(file.name);
+                    if (!topicName || existingLower.includes(topicName.toLowerCase())) return;
+                    if (!customTopics.prelims[subjName]) customTopics.prelims[subjName] = [];
+                    customTopics.prelims[subjName].push(topicName);
+                    existingLower.push(topicName.toLowerCase());
+                    added++;
+                });
+            }
+        });
+
+        return { added, message: `Added ${added} new Prelims topics.` };
+    }
+
+    function parseMainsJSON(json) {
+        let added = 0;
+        // Navigate: root > GS folders > subject folders > .md files
+        let gsNodes = null;
+        function findGS(node) {
+            if (!node.children) return;
+            const gsKids = node.children.filter(c => c.type === 'folder' && /^GS\s*\d/i.test(c.name));
+            if (gsKids.length > 0) { gsNodes = gsKids; return; }
+            for (const child of node.children) { if (child.type === 'folder') findGS(child); }
+        }
+        findGS(json);
+        if (!gsNodes) return { added: 0, message: 'Could not find GS paper folders in JSON.' };
+
+        gsNodes.forEach(gsFolder => {
+            const gsName = gsFolder.name.replace(/(\d)/, ' $1').replace(/\s+/g, ' ').trim();
+            const gsKey = Object.keys(BASE_MAINS).find(k => k.replace(/\s/g,'') === gsName.replace(/\s/g,'')) || gsName;
+
+            if (!BASE_MAINS[gsKey]) BASE_MAINS[gsKey] = [];
+            if (!customTopics.mains[gsKey]) customTopics.mains[gsKey] = {};
+
+            if (gsFolder.children) {
+                gsFolder.children.forEach(subjFolder => {
+                    if (subjFolder.type !== 'folder' || !subjFolder.children) return;
+                    const folderName = cleanFileName(subjFolder.name);
+                    // Match to existing subject
+                    const baseSubjects = BASE_MAINS[gsKey] || [];
+                    const match = baseSubjects.find(s =>
+                        s.name.toLowerCase().includes(folderName.toLowerCase().substring(0, 8)) ||
+                        folderName.toLowerCase().includes(s.name.toLowerCase().substring(0, 8))
+                    );
+                    const subjName = match ? match.name : folderName;
+
+                    if (!match) {
+                        BASE_MAINS[gsKey].push({ name: subjName, icon: "📖", topics: [] });
+                    }
+
+                    const mergedM = getMergedMains();
+                    const existingTopics = mergedM[gsKey]?.find(s => s.name === subjName)?.topics || [];
+                    const existingLower = existingTopics.map(t => t.toLowerCase());
+
+                    subjFolder.children.forEach(file => {
+                        if (file.type !== 'file' || !file.name.endsWith('.md')) return;
+                        const topicName = cleanFileName(file.name);
+                        if (!topicName || existingLower.includes(topicName.toLowerCase())) return;
+                        if (!customTopics.mains[gsKey][subjName]) customTopics.mains[gsKey][subjName] = [];
+                        customTopics.mains[gsKey][subjName].push(topicName);
+                        existingLower.push(topicName.toLowerCase());
+                        added++;
+                    });
+                });
+
+                // Handle GS4 which has .md files directly (not in subfolders)
+                const directFiles = gsFolder.children.filter(c => c.type === 'file' && c.name.endsWith('.md'));
+                if (directFiles.length > 0) {
+                    const subjName = BASE_MAINS[gsKey]?.[0]?.name || gsKey;
+                    const mergedM = getMergedMains();
+                    const existingTopics = mergedM[gsKey]?.find(s => s.name === subjName)?.topics || [];
+                    const existingLower = existingTopics.map(t => t.toLowerCase());
+
+                    directFiles.forEach(file => {
+                        const topicName = cleanFileName(file.name);
+                        if (!topicName || existingLower.includes(topicName.toLowerCase())) return;
+                        if (!customTopics.mains[gsKey][subjName]) customTopics.mains[gsKey][subjName] = [];
+                        customTopics.mains[gsKey][subjName].push(topicName);
+                        existingLower.push(topicName.toLowerCase());
+                        added++;
+                    });
+                }
+            }
+        });
+
+        return { added, message: `Added ${added} new Mains topics.` };
+    }
+
+    // ══════════════════════════════════════════════
+    //  STORAGE
+    // ══════════════════════════════════════════════
+    function getKey(section, subjectName, topicIdx) { return `${section}::${subjectName}::${topicIdx}`; }
+    function isCompleted(key) { return !!progress[key]; }
+    function saveToLocalStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }
+    function loadFromLocalStorage() { try { progress = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { progress = {}; } }
+    function saveCustomTopics() { localStorage.setItem(CUSTOM_TOPICS_KEY, JSON.stringify(customTopics)); }
+    function loadCustomTopics() { try { customTopics = JSON.parse(localStorage.getItem(CUSTOM_TOPICS_KEY)) || { prelims: {}, mains: {} }; } catch(e) { customTopics = { prelims: {}, mains: {} }; } }
+
+    function saveProgress() {
+        saveToLocalStorage();
+        if (fileHandle) { clearTimeout(saveDebounceTimer); saveDebounceTimer = setTimeout(() => writeToFile(), 500); }
+    }
+
+    function toggleTopic(key) {
+        const prelims = getMergedPrelims(), mains = getMergedMains();
+        const pS = computeStats('prelims', prelims), mS = computeStats('mains', mains);
+        const allT = pS.total + mS.total, prevPct = allT > 0 ? Math.round(((pS.done+mS.done)/allT)*100) : 0;
+
+        if (progress[key]) delete progress[key]; else progress[key] = Date.now();
+        saveProgress(); updateAllUI();
+
+        const np = computeStats('prelims', getMergedPrelims()), nm = computeStats('mains', getMergedMains());
+        const newPct = allT > 0 ? Math.round(((np.done+nm.done)/allT)*100) : 0;
+        for (const m of [25,50,75,100]) { if (prevPct < m && newPct >= m) { launchConfetti(); break; } }
+    }
+
+    // ══════════════════════════════════════════════
+    //  FILE SYSTEM ACCESS API
+    // ══════════════════════════════════════════════
+    const hasFileSystemAccess = 'showSaveFilePicker' in window;
+
+    function openHandleDB() { return new Promise((res,rej) => { const r = indexedDB.open(FILE_HANDLE_DB,1); r.onupgradeneeded = () => r.result.createObjectStore('handles'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+    async function storeFileHandle(h) { const db = await openHandleDB(); const tx = db.transaction('handles','readwrite'); tx.objectStore('handles').put(h,'progressFile'); return new Promise((r,e) => { tx.oncomplete = r; tx.onerror = () => e(tx.error); }); }
+    async function getStoredFileHandle() { const db = await openHandleDB(); const tx = db.transaction('handles','readonly'); const rq = tx.objectStore('handles').get('progressFile'); return new Promise((r,e) => { rq.onsuccess = () => r(rq.result||null); rq.onerror = () => e(rq.error); }); }
+
+    async function connectFile() {
+        if (!hasFileSystemAccess) { showToast('Browser doesn\'t support auto-save. Use Save/Load.', 'error'); return; }
+        try {
+            fileHandle = await window.showSaveFilePicker({ suggestedName: 'UPSC_Progress.md', types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }] });
+            await storeFileHandle(fileHandle); updateFileStatus(true, fileHandle.name);
+            await writeToFile(); showToast(`✓ Linked to ${fileHandle.name}`, 'success');
+        } catch(e) { if (e.name !== 'AbortError') showToast('Failed: ' + e.message, 'error'); }
+    }
+
+    async function tryReconnectFile() {
+        if (!hasFileSystemAccess) return;
+        try {
+            const stored = await getStoredFileHandle(); if (!stored) return;
+            if (await stored.requestPermission({ mode: 'readwrite' }) === 'granted') {
+                fileHandle = stored; updateFileStatus(true, fileHandle.name);
+                const text = await (await fileHandle.getFile()).text();
+                if (text.includes('UPSC Study Progress')) { progress = parseMarkdown(text); saveToLocalStorage(); updateAllUI(); showToast(`✓ Restored from ${fileHandle.name}`, 'success'); }
+            }
+        } catch(e) { console.log('Auto-reconnect failed:', e.message); }
+    }
+
+    async function writeToFile() {
+        if (!fileHandle) return;
+        try { const w = await fileHandle.createWritable(); await w.write(generateMarkdown()); await w.close(); }
+        catch(e) { console.error('Write failed:', e); }
+    }
+
+    // ══════════════════════════════════════════════
+    //  MARKDOWN GENERATE / PARSE
+    // ══════════════════════════════════════════════
+    function generateMarkdown() {
+        const prelims = getMergedPrelims(), mains = getMergedMains();
+        const now = new Date().toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' });
+        const pS = computeStats('prelims', prelims), mS = computeStats('mains', mains);
+        const allT = pS.total+mS.total, allD = pS.done+mS.done;
+
+        let md = `# 📊 UPSC Study Progress\n\n> **Last updated:** ${now}  \n> **Overall:** ${allD}/${allT} (${allT>0?Math.round(allD/allT*100):0}%) | **Prelims:** ${pS.done}/${pS.total} (${pS.pct}%) | **Mains:** ${mS.done}/${mS.total} (${mS.pct}%)\n\n---\n\n## 📝 Prelims\n\n`;
+        prelims.forEach(subj => {
+            const st = computeSubjectStats('prelims',null,subj.name,subj.topics);
+            md += `### ${subj.icon} ${subj.name} — ${st.done}/${st.total}\n\n`;
+            subj.topics.forEach((t,i) => { md += `- [${isCompleted(getKey('prelims',subj.name,i))?'x':' '}] ${t}\n`; });
+            md += '\n';
+        });
+        md += `---\n\n## 📚 Mains\n\n`;
+        Object.keys(mains).forEach(gs => {
+            const gsSt = computeGSStats(gs);
+            md += `### ${gs} — ${gsSt.done}/${gsSt.total} (${gsSt.pct}%)\n\n`;
+            mains[gs].forEach(subj => {
+                const st = computeSubjectStats('mains',gs,subj.name,subj.topics);
+                md += `#### ${subj.name} — ${st.done}/${st.total}\n\n`;
+                subj.topics.forEach((t,i) => { md += `- [${isCompleted(getKey(`mains_${gs}`,subj.name,i))?'x':' '}] ${t}\n`; });
+                md += '\n';
+            });
+        });
+        return md;
+    }
+
+    function parseMarkdown(mdText) {
+        const np = {}; let cs = null, cSubj = null, idx = 0, inP = false, inM = false, cGS = null;
+        const prelims = getMergedPrelims(), mains = getMergedMains();
+        for (const line of mdText.split('\n')) {
+            const t = line.trim();
+            if (/^## .*Prelims/i.test(t)) { inP=true; inM=false; cGS=null; cSubj=null; idx=0; continue; }
+            if (/^## .*Mains/i.test(t)) { inP=false; inM=true; cGS=null; cSubj=null; idx=0; continue; }
+            if (inM && /^### (GS \d)/.test(t)) { const m=t.match(/^### (GS \d)/); if(m){cGS=m[1]; cSubj=null; idx=0;} continue; }
+            if (inP && /^###\s/.test(t)) {
+                const m = t.match(/^###\s+(?:[\u{1F000}-\u{1FFFF}]\s*)?(.+?)(?:\s*—.*)?$/u);
+                if(m){ const n=m[1].trim(); const f=prelims.find(s=>s.name.toLowerCase()===n.toLowerCase()); if(f){cSubj=f.name; cs='prelims'; idx=0;} } continue;
+            }
+            if (inM && cGS && /^####\s/.test(t)) {
+                const m = t.match(/^####\s+(.+?)(?:\s*—.*)?$/);
+                if(m){ const n=m[1].trim(); const f=mains[cGS]?.find(s=>s.name.toLowerCase()===n.toLowerCase()); if(f){cSubj=f.name; cs=`mains_${cGS}`; idx=0;} } continue;
+            }
+            const cm = t.match(/^- \[(x| )\] (.+)$/i);
+            if (cm && cSubj && cs) { if(cm[1].toLowerCase()==='x') np[getKey(cs,cSubj,idx)] = Date.now(); idx++; }
+        }
+        return np;
+    }
+
+    function downloadMarkdown() {
+        const md = generateMarkdown(); const b = new Blob([md],{type:'text/markdown'}); const u = URL.createObjectURL(b);
+        const a = document.createElement('a'); a.href=u; a.download='UPSC_Progress.md'; a.click(); URL.revokeObjectURL(u);
+        showToast('✓ Downloaded UPSC_Progress.md', 'success');
+    }
+
+    function uploadMarkdown() { document.getElementById('file-input-hidden').click(); }
+
+    // ══════════════════════════════════════════════
+    //  COMPUTE STATS
+    // ══════════════════════════════════════════════
+    function computeStats(section, data) {
+        let total=0, done=0;
+        if (section==='prelims') { data.forEach(s => s.topics.forEach((_,i)=>{total++; if(isCompleted(getKey('prelims',s.name,i)))done++;})); }
+        else { Object.keys(data).forEach(gs => data[gs].forEach(s => s.topics.forEach((_,i)=>{total++; if(isCompleted(getKey(`mains_${gs}`,s.name,i)))done++;}))); }
+        return { total, done, pct: total>0?Math.round(done/total*100):0 };
+    }
+    function computeSubjectStats(section, gs, subjectName, topics) {
+        let total=topics.length, done=0; const prefix = section==='prelims'?'prelims':`mains_${gs}`;
+        topics.forEach((_,i)=>{ if(isCompleted(getKey(prefix,subjectName,i)))done++; });
+        return { total, done, pct: total>0?Math.round(done/total*100):0 };
+    }
+    function computeGSStats(gs) {
+        const mains = getMergedMains(); let total=0, done=0;
+        (mains[gs]||[]).forEach(s => s.topics.forEach((_,i)=>{total++; if(isCompleted(getKey(`mains_${gs}`,s.name,i)))done++;}));
+        return { total, done, pct: total>0?Math.round(done/total*100):0 };
+    }
+    function countTodayCompleted() { const d = new Date(); d.setHours(0,0,0,0); return Object.values(progress).filter(ts=>ts>=d.getTime()).length; }
+
+    // ══════════════════════════════════════════════
+    //  RENDER
+    // ══════════════════════════════════════════════
+    function renderSubjectSection(containerId, section, gs, subjectData, filterText) {
+        const container = document.getElementById(containerId); container.innerHTML = '';
+        let visible = 0;
+
+        subjectData.forEach(subj => {
+            const prefix = section==='prelims'?'prelims':`mains_${gs}`;
+            const filtered = filterText
+                ? subj.topics.map((t,i)=>({t,i})).filter(({t})=>t.toLowerCase().includes(filterText.toLowerCase()))
+                : subj.topics.map((t,i)=>({t,i}));
+            if (filterText && filtered.length===0 && !subj.name.toLowerCase().includes(filterText.toLowerCase())) return;
+            visible++;
+
+            const stats = computeSubjectStats(section, gs, subj.name, subj.topics);
+            const allItems = filterText ? filtered : subj.topics.map((t,i)=>({t,i}));
+            const allDone = stats.done===stats.total;
+
+            const sec = document.createElement('div'); sec.className='subject-section';
+            sec.innerHTML = `
+                <div class="subject-header">
+                    <div class="subject-left">
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        <span class="subject-name">${subj.icon||'📖'} ${subj.name}</span>
+                    </div>
+                    <div class="subject-right">
+                        <button class="add-topic-btn" data-section="${section}" data-gs="${gs||''}" data-subj="${subj.name}">＋ Add</button>
+                        <button class="mark-all-btn ${allDone?'unmark':''}" data-prefix="${prefix}" data-subj="${subj.name}" data-count="${subj.topics.length}">${allDone?'✕ Unmark All':'✓ Mark All'}</button>
+                        <div class="subject-progress-bar"><div class="subject-progress-fill ${stats.pct===100?'complete':''}" style="width:${stats.pct}%"></div></div>
+                        <span class="subject-count">${stats.done}/${stats.total}</span>
+                    </div>
+                </div>
+                <div class="subject-body">
+                    ${allItems.map(({t,i}) => {
+                        const key = getKey(prefix,subj.name,i);
+                        const checked = isCompleted(key);
+                        const custom = isCustomTopic(section, gs, subj.name, i);
+                        const customName = custom ? getCustomTopicName(section, gs, subj.name, i) : null;
+                        return `<div class="topic-item ${checked?'completed':''}" data-key="${key}">
+                            <span class="topic-number">${i+1}</span>
+                            <label class="topic-checkbox"><input type="checkbox" ${checked?'checked':''} data-key="${key}"><span class="checkmark"></span></label>
+                            <span class="topic-label">${t}</span>
+                            <button class="topic-delete ${custom?'custom-topic':''}" title="${custom?'Remove custom topic':''}" data-section="${section}" data-gs="${gs||''}" data-subj="${subj.name}" data-topic="${customName||''}" ${custom?'':'style="display:none"'}>✕</button>
+                        </div>`;
+                    }).join('')}
+                    <div class="add-topic-form" style="display:none" data-section="${section}" data-gs="${gs||''}" data-subj="${subj.name}">
+                        <input type="text" placeholder="Enter new topic name..." class="add-topic-input">
+                        <button class="confirm-btn">Add</button>
+                        <button class="cancel-btn">Cancel</button>
+                    </div>
+                </div>`;
+            container.appendChild(sec);
+        });
+
+        if (visible===0 && filterText) { container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No topics found for "<strong>${filterText}</strong>"</p></div>`; }
+
+        // Events
+        container.querySelectorAll('.subject-header').forEach(h => {
+            h.addEventListener('click', e => {
+                if (e.target.closest('.mark-all-btn') || e.target.closest('.add-topic-btn')) return;
+                h.classList.toggle('expanded'); h.nextElementSibling.classList.toggle('expanded');
+            });
+        });
+        container.querySelectorAll('.topic-checkbox input').forEach(cb => cb.addEventListener('change', () => toggleTopic(cb.dataset.key)));
+        container.querySelectorAll('.mark-all-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const prefix=btn.dataset.prefix, sn=btn.dataset.subj, cnt=parseInt(btn.dataset.count), un=btn.classList.contains('unmark');
+                for(let i=0;i<cnt;i++){const k=getKey(prefix,sn,i); if(un)delete progress[k]; else if(!progress[k])progress[k]=Date.now();}
+                saveProgress(); updateAllUI();
+            });
+        });
+
+        // Add topic buttons
+        container.querySelectorAll('.add-topic-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const header = btn.closest('.subject-header');
+                const body = header.nextElementSibling;
+                if (!header.classList.contains('expanded')) { header.classList.add('expanded'); body.classList.add('expanded'); }
+                const form = body.querySelector('.add-topic-form');
+                form.style.display = 'flex';
+                form.querySelector('input').focus();
+            });
+        });
+        container.querySelectorAll('.add-topic-form').forEach(form => {
+            const inp = form.querySelector('input');
+            const confirm = form.querySelector('.confirm-btn');
+            const cancel = form.querySelector('.cancel-btn');
+            const doAdd = () => { addCustomTopic(form.dataset.section, form.dataset.gs||null, form.dataset.subj, inp.value); };
+            confirm.addEventListener('click', doAdd);
+            inp.addEventListener('keydown', e => { if(e.key==='Enter') doAdd(); if(e.key==='Escape') { form.style.display='none'; inp.value=''; } });
+            cancel.addEventListener('click', () => { form.style.display='none'; inp.value=''; });
+        });
+
+        // Delete custom topic buttons
+        container.querySelectorAll('.topic-delete.custom-topic').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                if (confirm(`Remove "${btn.dataset.topic}"?`)) {
+                    removeCustomTopic(btn.dataset.section, btn.dataset.gs||null, btn.dataset.subj, btn.dataset.topic);
+                }
+            });
+        });
+
+        if (filterText) container.querySelectorAll('.subject-header').forEach(h => { h.classList.add('expanded'); h.nextElementSibling.classList.add('expanded'); });
+    }
+
+    function renderOverview() {
+        const prelims=getMergedPrelims(), mains=getMergedMains();
+        const pS=computeStats('prelims',prelims), mS=computeStats('mains',mains);
+        const allT=pS.total+mS.total, allD=pS.done+mS.done, allP=allT>0?Math.round(allD/allT*100):0;
+        document.getElementById('overview-grid').innerHTML = `
+            <div class="overview-card"><div class="overview-label">Total Topics</div><div class="overview-value" style="color:var(--accent-blue)">${allT}</div><div class="overview-sub">Across Prelims & Mains</div></div>
+            <div class="overview-card"><div class="overview-label">Completed</div><div class="overview-value" style="color:var(--accent-green)">${allD}</div><div class="overview-sub">${allP}% overall progress</div></div>
+            <div class="overview-card"><div class="overview-label">Remaining</div><div class="overview-value" style="color:var(--accent-amber)">${allT-allD}</div><div class="overview-sub">${100-allP}% left</div></div>
+            <div class="overview-card"><div class="overview-label">Today's Streak</div><div class="overview-value" style="color:var(--accent-purple)">${countTodayCompleted()}</div><div class="overview-sub">Topics today</div></div>`;
+        const donuts=[{l:'Prelims',s:pS,c:'#3b82f6'},{l:'GS 1',s:computeGSStats('GS 1'),c:'#06b6d4'},{l:'GS 2',s:computeGSStats('GS 2'),c:'#8b5cf6'},{l:'GS 3',s:computeGSStats('GS 3'),c:'#f59e0b'},{l:'GS 4',s:computeGSStats('GS 4'),c:'#10b981'}];
+        const circ=2*Math.PI*60;
+        document.getElementById('donut-container').innerHTML = donuts.map(d=>{const off=circ-(d.s.pct/100)*circ; return `<div class="donut-wrapper"><svg viewBox="0 0 140 140"><circle class="donut-bg" cx="70" cy="70" r="60"></circle><circle class="donut-fill" cx="70" cy="70" r="60" stroke="${d.c}" stroke-dasharray="${circ}" stroke-dashoffset="${off}"></circle></svg><div class="donut-center"><div class="donut-pct" style="color:${d.c}">${d.s.pct}%</div><div class="donut-sub">${d.l}</div></div></div>`;}).join('');
+    }
+
+    function renderMains(filterText) {
+        const mains=getMergedMains(), container=document.getElementById('mains-subjects'); container.innerHTML='';
+        Object.keys(mains).forEach(gs=>{
+            const gsSt=computeGSStats(gs), gsN=gs.replace('GS ','');
+            const sec=document.createElement('div'); sec.className='gs-paper-section';
+            sec.innerHTML=`<div class="gs-paper-header"><span class="gs-paper-tag gs${gsN}">${gs}</span><span class="gs-paper-info">${mains[gs].length} sections · ${gsSt.total} topics</span><div class="gs-paper-progress"><div class="gs-paper-bar"><div class="gs-paper-fill gs${gsN}" style="width:${gsSt.pct}%"></div></div><span class="gs-paper-pct" style="color:var(--accent-${gsN==1?'cyan':gsN==2?'purple':gsN==3?'amber':'green'})">${gsSt.pct}%</span></div></div><div id="mains-gs${gsN}-subjects"></div>`;
+            container.appendChild(sec);
+            renderSubjectSection(`mains-gs${gsN}-subjects`,'mains',gs,mains[gs],filterText);
+        });
+    }
+
+    function getMotivation() {
+        const prelims=getMergedPrelims(), mains=getMergedMains();
+        const pS=computeStats('prelims',prelims), mS=computeStats('mains',mains);
+        const allT=pS.total+mS.total, allD=pS.done+mS.done, pct=allT>0?Math.round(allD/allT*100):0;
+        if(pct===0) return {emoji:'🚀',text:'Start your UPSC journey! Mark topics as you complete them.'};
+        if(pct<10) return {emoji:'🌱',text:`You've begun! <strong>${allD} topics</strong> down. Every step counts.`};
+        if(pct<25) return {emoji:'📚',text:`Solid start! <strong>${pct}%</strong> complete. Consistency is key.`};
+        if(pct<50) return {emoji:'💪',text:`Amazing! <strong>${pct}%</strong> through. Keep this momentum!`};
+        if(pct<75) return {emoji:'🔥',text:`On fire! <strong>${pct}%</strong> done. Finish line is close!`};
+        if(pct<100) return {emoji:'⭐',text:`Almost there! <strong>${pct}%</strong> complete. Final stretch!`};
+        return {emoji:'🏆',text:`<strong>INCREDIBLE!</strong> All ${allT} topics completed! You're fully prepared!`};
+    }
+
+    function updateAllUI() {
+        const prelims=getMergedPrelims(), mains=getMergedMains();
+        const pS=computeStats('prelims',prelims), mS=computeStats('mains',mains);
+        const allT=pS.total+mS.total, allD=pS.done+mS.done;
+        document.getElementById('stat-total').textContent=allT;
+        document.getElementById('stat-completed').textContent=allD;
+        document.getElementById('stat-remaining').textContent=allT-allD;
+        document.getElementById('prelims-badge').textContent=pS.pct+'%';
+        document.getElementById('mains-badge').textContent=mS.pct+'%';
+        const m=getMotivation(); document.querySelector('#motivation-banner .emoji').textContent=m.emoji; document.getElementById('motivation-text').innerHTML=m.text;
+        renderOverview();
+        const tab=document.querySelector('.tab-btn.active').dataset.tab;
+        if(tab==='prelims') renderSubjectSection('prelims-subjects','prelims',null,prelims,document.getElementById('prelims-search').value);
+        else if(tab==='mains') renderMains(document.getElementById('mains-search').value);
+    }
+
+    // ══════════════════════════════════════════════
+    //  UI HELPERS
+    // ══════════════════════════════════════════════
+    function updateFileStatus(connected, fname) {
+        const el=document.getElementById('file-status'), t=document.getElementById('file-status-text');
+        if(connected){el.className='file-status connected';t.textContent=fname;document.getElementById('file-connect-btn').textContent='📁 '+fname;document.getElementById('file-connect-btn').classList.add('connected');}
+        else{el.className='file-status disconnected';t.textContent='No file linked';document.getElementById('file-connect-btn').textContent='📁 Link File';document.getElementById('file-connect-btn').classList.remove('connected');}
+    }
+
+    let toastTimer;
+    function showToast(msg,type='info') {
+        const t=document.getElementById('sync-toast'); t.className=`sync-toast ${type}`; t.textContent=msg;
+        clearTimeout(toastTimer); requestAnimationFrame(()=>{t.classList.add('show'); toastTimer=setTimeout(()=>t.classList.remove('show'),3000);});
+    }
+
+    function launchConfetti() {
+        const c=document.createElement('div'); c.className='confetti-container'; document.body.appendChild(c);
+        const colors=['#3b82f6','#10b981','#f59e0b','#f43f5e','#8b5cf6','#06b6d4','#34d399'];
+        for(let i=0;i<60;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.left=Math.random()*100+'%';p.style.background=colors[Math.floor(Math.random()*colors.length)];p.style.animationDelay=Math.random()*1.5+'s';p.style.animationDuration=(2+Math.random()*2)+'s';p.style.width=(6+Math.random()*6)+'px';p.style.height=(6+Math.random()*6)+'px';c.appendChild(p);}
+        setTimeout(()=>c.remove(),4000);
+    }
+
+    // ══════════════════════════════════════════════
+    //  EVENT BINDINGS
+    // ══════════════════════════════════════════════
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+            btn.classList.add('active'); document.getElementById(`content-${btn.dataset.tab}`).classList.add('active');
+            if(btn.dataset.tab==='prelims') renderSubjectSection('prelims-subjects','prelims',null,getMergedPrelims(),document.getElementById('prelims-search').value);
+            else if(btn.dataset.tab==='mains') renderMains(document.getElementById('mains-search').value);
+        });
+    });
+
+    let searchTimeout;
+    document.getElementById('prelims-search').addEventListener('input',e=>{clearTimeout(searchTimeout);searchTimeout=setTimeout(()=>renderSubjectSection('prelims-subjects','prelims',null,getMergedPrelims(),e.target.value),200);});
+    document.getElementById('mains-search').addEventListener('input',e=>{clearTimeout(searchTimeout);searchTimeout=setTimeout(()=>renderMains(e.target.value),200);});
+
+    document.getElementById('file-connect-btn').addEventListener('click', connectFile);
+    document.getElementById('file-save-btn').addEventListener('click', downloadMarkdown);
+    document.getElementById('file-load-btn').addEventListener('click', uploadMarkdown);
+    document.getElementById('reset-btn').addEventListener('click',()=>{
+        if(confirm('Reset ALL progress? This cannot be undone.')){progress={};saveProgress();updateAllUI();}
+    });
+
+    document.getElementById('file-input-hidden').addEventListener('change', async e=>{
+        const f=e.target.files[0]; if(!f) return;
+        try{ const t=await f.text(); if(!t.includes('- [')){showToast('Not a valid progress file.','error');return;}
+        progress=parseMarkdown(t); saveToLocalStorage(); updateAllUI(); if(fileHandle) await writeToFile();
+        showToast(`✓ Loaded from ${f.name}`,'success'); }catch(er){showToast('Failed: '+er.message,'error');}
+        e.target.value='';
+    });
+
+    // JSON Import
+    document.getElementById('json-import-btn').addEventListener('click',()=>document.getElementById('json-modal').classList.add('show'));
+    document.getElementById('json-modal-close').addEventListener('click',()=>{document.getElementById('json-modal').classList.remove('show');document.getElementById('import-result').classList.remove('show');});
+    document.getElementById('json-modal').addEventListener('click',e=>{if(e.target===e.currentTarget){e.currentTarget.classList.remove('show');document.getElementById('import-result').classList.remove('show');}});
+
+    document.getElementById('import-prelims-btn').addEventListener('click',()=>{jsonImportType='prelims';document.getElementById('json-input-hidden').click();});
+    document.getElementById('import-mains-btn').addEventListener('click',()=>{jsonImportType='mains';document.getElementById('json-input-hidden').click();});
+
+    document.getElementById('json-input-hidden').addEventListener('change', async e=>{
+        const f=e.target.files[0]; if(!f) return;
+        try {
+            const json = JSON.parse(await f.text());
+            let result;
+            if(jsonImportType==='prelims') result = parsePrelimsJSON(json);
+            else result = parseMainsJSON(json);
+
+            saveCustomTopics(); updateAllUI();
+            if(fileHandle) await writeToFile();
+
+            const resEl = document.getElementById('import-result');
+            resEl.className='import-result success show';
+            resEl.textContent=`✓ ${result.message} Dashboard updated!`;
+            showToast(`✓ ${result.message}`,'success');
+        } catch(er) { showToast('JSON parse error: '+er.message,'error'); }
+        e.target.value='';
+    });
+
+    // ── INIT ──
+    loadFromLocalStorage();
+    loadCustomTopics();
+    updateAllUI();
+    tryReconnectFile();
+    </script>
+</body>
+</html>
